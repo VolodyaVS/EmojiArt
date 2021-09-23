@@ -194,7 +194,9 @@ extension UIImage {
                appropriateFor: nil,
                create: true
         )
+
         url = url?.appendingPathComponent(name)
+
         if url != nil {
             do {
                 try jpegData(compressionQuality: 1.0)?.write(to: url!)

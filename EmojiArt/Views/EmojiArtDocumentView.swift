@@ -30,6 +30,8 @@ struct EmojiArtDocumentView: View {
     @State private var choosenPalette = ""
     @State private var explainBackgroundPaste = false
     @State private var confirmBackgroundPaste = false
+    @State private var showImagePicker = false
+    @State private var imagePickerSourceType = UIImagePickerController.SourceType.photoLibrary
 
     init(document: EmojiArtDocumentViewModel) {
         self.document = document
@@ -85,22 +87,28 @@ struct EmojiArtDocumentView: View {
                                        y: location.y / zoomScale)
                     return drop(providers: providers, at: location)
                 }
-                .navigationBarItems(trailing: Button(action: {
-                    if let url = UIPasteboard.general.url, url != document.backgroundURL {
-                        confirmBackgroundPaste = true
-                    } else {
-                        explainBackgroundPaste = true
-                    }
-                }, label: {
-                    Image(systemName: "doc.on.clipboard").imageScale(.large)
-                        .alert(isPresented: $explainBackgroundPaste) {
-                            Alert(
-                                title: Text("Paste Background"),
-                                message: Text("Copy the URL of a image to the clip board and touch this button to make it the background of your document."),
-                                dismissButton: .default(Text("OK"))
-                            )
+                .navigationBarItems(
+                    leading: pickImage,
+                    trailing: Button(
+                        action: {
+                            if let url = UIPasteboard.general.url, url != document.backgroundURL {
+                                confirmBackgroundPaste = true
+                            } else {
+                                explainBackgroundPaste = true
+                            }
+                        },
+                        label: {
+                            Image(systemName: "doc.on.clipboard").imageScale(.large)
+                                .alert(isPresented: $explainBackgroundPaste) {
+                                    Alert(
+                                        title: Text("Paste Background"),
+                                        message: Text("Copy the URL of a image to the clip board and touch this button to make it the background of your document."),
+                                        dismissButton: .default(Text("OK"))
+                                    )
+                                }
                         }
-                }))
+                    )
+                )
             }
             .zIndex(-1)
         }
@@ -113,6 +121,33 @@ struct EmojiArtDocumentView: View {
                 },
                 secondaryButton: .cancel()
             )
+        }
+    }
+
+    private var pickImage: some View {
+        HStack {
+            Image(systemName: "photo").imageScale(.large).foregroundColor(.accentColor)
+                .onTapGesture {
+                    imagePickerSourceType = .photoLibrary
+                    showImagePicker = true
+                }
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Image(systemName: "camera").imageScale(.large).foregroundColor(.accentColor)
+                    .onTapGesture {
+                        imagePickerSourceType = .camera
+                        showImagePicker = true
+                    }
+            }
+        }
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(sourceType: imagePickerSourceType) { image in
+                if image != nil {
+                    DispatchQueue.main.async {
+                        document.backgroundURL = image!.storeInFilesystem()
+                    }
+                }
+                showImagePicker = false
+            }
         }
     }
 
