@@ -3,6 +3,7 @@
 //  EmojiArt
 //
 //  Created by Vladimir Stepanchikov on 04.09.2021.
+//  Copyright © 2020 Stanford University. All rights reserved.
 //
 
 import SwiftUI
@@ -24,6 +25,7 @@ class EmojiArtDocumentViewModel: ObservableObject, Hashable, Identifiable {
     }
 
     let id: UUID
+    var url: URL? { didSet { save(emojiArt) } }
 
     @Published var steadyStateZoomScale: CGFloat = 1.0
     @Published var steadyStatePanOffset: CGSize = .zero
@@ -43,6 +45,16 @@ class EmojiArtDocumentViewModel: ObservableObject, Hashable, Identifiable {
             UserDefaults.standard.set(emojiArt.json, forKey: defaultsKey)
         }
         fetchBackgroundImageData()
+    }
+
+    init(url: URL) {
+        self.id = UUID()
+        self.url = url
+        self.emojiArt = EmojiArtModel(json: try? Data(contentsOf: url)) ?? EmojiArtModel()
+        fetchBackgroundImageData()
+        autosaveCancellable = $emojiArt.sink(receiveValue: { emojiArt in
+            self.save(emojiArt)
+        })
     }
 
     // MARK: - Intent(s)
@@ -80,6 +92,12 @@ class EmojiArtDocumentViewModel: ObservableObject, Hashable, Identifiable {
                 .receive(on: DispatchQueue.main)
                 .replaceError(with: nil)
                 .assign(to: \EmojiArtDocumentViewModel.backgroundImage, on: self)
+        }
+    }
+
+    private func save(_ emojiArt: EmojiArtModel) {
+        if url != nil {
+            try? emojiArt.json?.write(to: url!)
         }
     }
 }

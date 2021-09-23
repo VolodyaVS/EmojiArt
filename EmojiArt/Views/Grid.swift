@@ -3,7 +3,7 @@
 //  Memorize
 //
 //  Created by Vladimir Stepanchikov on 19.06.2021.
-//  Copyright © 2021 Vladimir Stepanchikov. All rights reserved.
+//  Copyright © 2020 Stanford University. All rights reserved.
 //
 
 import SwiftUI

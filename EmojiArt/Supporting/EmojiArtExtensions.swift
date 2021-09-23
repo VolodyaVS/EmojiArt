@@ -3,6 +3,8 @@
 //  EmojiArt
 //
 //  Created by CS193p Instructor on 4/27/20.
+//  Edited by Vladimir Stepanchikov.
+//
 //  Copyright © 2020 Stanford University. All rights reserved.
 //
 
@@ -113,6 +115,28 @@ extension String {
         }
         return uniqued
     }
+
+    // returns ourself but with numbers appended to the end
+    // if necessary to make ourself unique with respect to those other Strings
+    func uniqued<StringCollection>(withRespectTo otherStrings: StringCollection) -> String
+    where StringCollection: Collection, StringCollection.Element == String {
+        var unique = self
+        while otherStrings.contains(unique) {
+            unique = unique.incremented
+        }
+        return unique
+    }
+    // if a number is at the end of this String
+    // this increments that number
+    // otherwise, it appends the number 1
+    var incremented: String  {
+        let prefix = String(reversed().drop(while: { $0.isNumber }).reversed())
+        if let number = Int(dropFirst(prefix.count)) {
+            return "\(prefix)\(number + 1)"
+        } else {
+            return "\(self) 1"
+        }
+    }
 }
 
 // it cleans up our code to be able to do more "math" on points and sizes
@@ -143,30 +167,6 @@ extension CGSize {
     }
     static func / (lhs: Self, rhs: CGFloat) -> CGSize {
         CGSize(width: lhs.width / rhs, height: lhs.height / rhs)
-    }
-}
-
-extension String {
-    // returns ourself but with numbers appended to the end
-    // if necessary to make ourself unique with respect to those other Strings
-    func uniqued<StringCollection>(withRespectTo otherStrings: StringCollection) -> String
-    where StringCollection: Collection, StringCollection.Element == String {
-        var unique = self
-        while otherStrings.contains(unique) {
-            unique = unique.incremented
-        }
-        return unique
-    }
-    // if a number is at the end of this String
-    // this increments that number
-    // otherwise, it appends the number 1
-    var incremented: String  {
-        let prefix = String(reversed().drop(while: { $0.isNumber }).reversed())
-        if let number = Int(dropFirst(prefix.count)) {
-            return "\(prefix)\(number+1)"
-        } else {
-            return "\(self) 1"
-        }
     }
 }
 

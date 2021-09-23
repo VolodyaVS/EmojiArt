@@ -3,6 +3,7 @@
 //  EmojiArt
 //
 //  Created by Vladimir Stepanchikov on 16.09.2021.
+//  Copyright © 2020 Stanford University. All rights reserved.
 //
 
 import SwiftUI
